@@ -1,0 +1,42 @@
+o
+    
+_$d	  ã                    @   s.  d dl mZmZmZmZmZ d dlm Z  d dlm	Z	 d dl m
+Z
+ d dl
+mZ d dl
+Zd dlZd dlZd d lmZ edd	d
+Zg d
+¢Zeje edd
+gd
+gd eejejdƒZG dd„ de	ƒZe d¡de
+fdd„ƒZe d¡de
+defdd„ƒZe d¡de
+defdd„ƒZedkr•ej dd dd!d" dS dS )#é    )Ú FastAPIÚ DependsÚFileÚ
+UploadFileÚ
+HTTPException)ÚCORSMiddleware)Ú	BaseModel)Ú Request)ÚsettingsN)Ú
+QdrantIndexzDrQA backend APIz/docs)ÚtitleÚdocs_url)zhttp://localhost:8000zhttp://localhost:3000zhttp://127.0.0.1:8000zhttp://127.0.0.1:3000TÚ*)Ú
+allow_originsÚallow_credentialsÚ
+allow_methodsÚ
+allow_headersFc                   @   s   e Zd ZU eed< dS )Ú	UserQueryÚqueryN)Ú__name__Ú
+__module__Ú__qualname__ÚstrÚ__annotations__© r   r   ú:/home/za/environments/expr_env/drqa-backend/app/main.pyr   .   s   
+ r   ú/Ú requestc                 Ã   s
+   ddiS )NÚ messagezServer is up and running!r   )r   r   r   r   Úroot4   s   €r   z/upload-fileÚfilec              
+   Ã   sü   |j }d}t|jƒ z5tj ddtj |¡¡}|  ¡ I d H }t|dƒ
+}| 	|¡ W d   ƒ n1 s4w   Y  t
+ 
+||¡ W n) tyi }  ztt
+| ƒƒ d}|d ur_tj |¡r_t |¡ W Y d } ~ nd } ~ ww |d urytj |¡ryt |¡ ||dœS ) NÚ successÚappÚ	documentsÚwbÚerror)ÚfilenameÚstatus)r&   ÚprintÚsizeÚosÚpathÚjoinÚbasenameÚreadÚopenÚwriteÚqdrant_indexÚinsert_into_indexÚ	Exceptionr   ÚexistsÚremove)r   r    r&   r'   ÚfilepathÚcontentsÚfÚexr   r   r   Ú
+upload_file:   s*   €
+ÿ
+€ü 
+
+r:   z/queryÚ
+input_queryc                 Ã   s.   t |ƒ tj|jd\}}t |ƒ ||dœS )N)Úquestion)ÚresponseÚ
+relevant_docs)r(   r1   Úgenerate_responser   )r   r;   Úgenerated_responser>   r   r   r   Ú
+query_indexT   s
+   €
+rA   Ú__main__zmain:appz 0.0.0.0i@  )ÚhostÚreloadÚport)!Ú fastapir   r   r   r   r   Úfastapi.middleware.corsr    Úpydanticr   r	   Úconfigr
+   ÚtypingÚtÚ uvicornr*   Ú
+qdrant_enginer
+   r"   Ú originsÚadd_middlewareÚ
+qdrant_hostÚqdrant_api_keyr1   r   Úgetr   Úpostr:   rA   r   Úrunr   r   r   r   Ú<module>   s>    ÿ û ÿ

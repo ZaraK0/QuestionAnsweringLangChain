@@ -1,0 +1,10 @@
+o
+    ›2#dØ   ã                   @   s&   d dl mZ G dd„ deƒZeƒ ZdS )é    )ÚBaseSettingsc                   @   s8   e Zd ZU dZeed< eed< eed< G dd„ dƒZd S )ÚSettingsÚ	localhostÚ
+qdrant_hostÚqdrant_api_keyÚopenai_api_keyc                   @   s   e Zd ZdZdS )zSettings.Configz.envN)Ú__name__Ú
+__module__Ú__qualname__Úenv_file© r   r   ú</home/za/environments/expr_env/drqa-backend/app/config.pyÚConfig   s    r   N) r   r	   r
+   r   ÚstrÚ__annotations__r   r   r   r   r
+   r      s
+   
+ r   N)Úpydanticr   r   Úsettingsr   r   r   r
+   Ú<module>   s    
+	

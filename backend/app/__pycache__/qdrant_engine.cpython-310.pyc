@@ -1,0 +1,71 @@
+o
+    Õ^$de  ã                   @   sP  d dl mZ d dlmZ d dlmZ d dlm Z  d dlm	Z	 d dlm Z m
+Z
+ d d l
+mZ d dl
+mZ d d	lmZ d d
+lmZ d d
+lmZmZ d dlmZ d d
+lmZ d dlmZ d dlmZmZmZm Z m!Z!m"Z"m#Z# d dl$m%Z% d dl&Z&d dl'Z'e'j(e'j)dd ee*e#e*e+e,f f Z-dZ.edddZ/eee%j0dddddZ1G dd„ dƒZ2dS )é    )ÚCharacterTextSplitter)ÚDocument)ÚQdrant)Ú
+TextLoader)ÚHuggingFaceEmbeddings)r   ÚPDFMinerLoader)Ú
+load_qa_chain)Úload_qa_with_sources_chain)ÚOpenAI)ÚQdrantClient)ÚDistanceÚVectorParams)ÚFilter)Úmodels)ÚSentenceTransformer) ÚAnyÚDictÚIterableÚListÚOptionalÚTupleÚUnion)ÚsettingsNz7=========== %(asctime)s :: %(levelname)s :: %(message)s)ÚlevelÚformatÚ
+qa_collectionz'sentence-transformers/all-mpnet-base-v2Úcpu)ÚdeviceF)Úopenai_api_keyÚ	streamingÚstuff)ÚllmÚ
+chain_typeÚ verbosec                   @   s   e Zd Zdededefdd„Zded efdd	„Zd
+efd
+d„Z d
+ee de	e
+e
+  dedede
+e
+ f
+dd„Z	ddede
+de	e de
+eeef  fdd„ZdS )Ú
+QdrantIndexÚ
+qdrant_hostÚqdrant_api_keyÚ
+prefer_grpcc                 C   s\   t |||d| _t| _| j ¡ | _t| _| jj | jt| jt	j
+dd t
+ dt› d¡ d S )N)Úhostr'   Ú api_key)ÚsizeÚdistance)Úcollection_nameÚvectors_configz
+Collection z is successfully created.)
+r
+   Ú
+qdrant_clientÚembedding_modelÚ get_sentence_embedding_dimensionÚembedding_sizeÚCOLLECTION_NAMEr,   Úrecreate_collectionr
+   r   ÚCOSINEÚ loggingÚinfo)Úselfr%   r&   r'   © r8   úC/home/za/environments/expr_env/drqa-backend/app/qdrant_engine.pyÚ__init__"   s   ışzQdrantIndex.__init__ÚfilepathÚfilenamec                  C   s    t |ƒ}| ¡ }tddd}| |¡}dd„ |D ƒ} dd„ |D ƒ}d d„ | D ƒ}	| jj| dd	d
+ ¡ }
+|   | |d
+d¡}
+| jj	t
+t
+j|	|
+|
+d
+d t
+ d¡ dS )z Adds new documents into the index
+
+        Args:
+            filepath (str): full path of the pdf file
+            filename (str): name of pdf file
+        iô  é   )Ú
+chunk_sizeÚ
+chunk_overlapc                 S   ó   g | ]}|j ‘qS r8   )Úpage_content©Ú.0Údocr8   r8   r9   Ú
+<listcomp>>   ó    z1QdrantIndex.insert_into_index.<locals>.<listcomp>c                 S   r@   r8   )ÚmetadatarB   r8   r8   r9   rE   ?   rF   c                 S   s   g | ] }t  ¡ j‘qS r8   )ÚuuidÚuuid4Úhex)rC   Ú_r8   r8   r9   rE   A   s    Fé€   )Úshow_progress_barÚ
+batch_sizerA   rG   )ÚidsÚ vectorsÚpayloads)r,   ÚpointszIndex update successfully done!N)r    Úloadr   Úsplit_documentsr/   ÚencodeÚtolistÚbuild_payloadsr.   Úupsertr2   ÚrestÚBatchr5   r6   )r7   r;   r<   ÚloaderÚdocsÚ
+text_splitterÚ	documentsÚtextsÚ	metadatasrO   rP   rQ   r8   r8   r9   Úinsert_into_index2   s.    
+ü ışzQdrantIndex.insert_into_indexÚquestionc                 C   s   | j |d}tj||d|fS )N)Úquery)Úinput_documentsrb   )Úsimilarity_search_with_scoreÚqa_chainÚrun)r7   rb   Ú
+relevant_docsr8   r8   r9   Úgenerate_responseU   s   zQdrantIndex.generate_responser_   r`   Úcontent_payload_keyÚmetadata_payload_keyÚreturnc           	       C   sP   g }t |ƒD ]\}} | d u rtdƒ‚|d ur|| nd }| || ||i¡ q|S )NzpAt least one of the texts is None. Please remove it before calling .from_texts or .add_texts on Qdrant instance.)Ú	enumerateÚ
+ValueErrorÚappend)	r7   r_   r`   rj   rk   rQ   ÚiÚtextrG   r8   r8   r9   rW   [   s   ÿşÿ zQdrantIndex.build_payloadsé   Nrc   ÚkÚfilterc                   C   s\   | j  |¡}| jj| j||rtdi |¤ndd|d}|D ]	}t|ƒ tƒ  qdd„ |D ƒS ) aE  Return docs most similar to query.
+        Args:
+            query: Text to look up documents similar to.
+            k: Number of Documents to return. Defaults to 4.
+            filter: Filter by metadata. Defaults to None.
+        Returns:
+            List of Documents most similar to the query and score for each
+        NT)r,   Úquery_vectorÚquery_filterÚwith_payloadÚlimitc                 S   s$   g | ]}t |jd  |jd d‘qS )rA   rG   )rA   rG   )r   Ú payload)rC   Úresultr8   r8   r9   rE   ‰   s    üşÿz<QdrantIndex.similarity_search_with_score.<locals>.<listcomp>r8   ) r/   rU   r.   Úsearchr,   r   Úprint) r7   rc   rs   rt   Ú	embeddingÚ resultsÚrr8   r8   r9   re   s   s   
+û ûz(QdrantIndex.similarity_search_with_score)rr   N)Ú__name__Ú
+__module__Ú__qualname__ÚstrÚboolr:   ra   ri   r   r   r   ÚdictrW   ÚintÚMetadataFilterr   r   Úfloatre   r8   r8   r8   r9   r$       s2    #ÿ
+şıü
+ûÿÿÿÿşr$   )3Úlangchain.text_splitterr   Úlangchain.docstore.documentr   Úlangchain.vectorstoresr   Úlangchain.document_loadersr   Úlangchain.embeddingsr   r    Ú#langchain.chains.question_answeringr   Ú langchain.chains.qa_with_sourcesr	   Úlangchain.llmsr
+   r.   r
+   Úqdrant_client.http.modelsr   r
+   r   Úqdrant_client.httpr   rY   Úsentence_transformersr   Útypingr   r   r   r   r   r   r   Úconfigr   rH   r5   Ú
+basicConfigÚINFOrƒ   r†   r„   r‡   r2   r/   r   rf   r$   r8   r8   r8   r9   Ú<module>   s0    $
