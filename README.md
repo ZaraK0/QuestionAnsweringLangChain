@@ -11,11 +11,11 @@ The image shows the architechture of the system and you can change the code base
   - handles all the requests coming from client side.
   - creates the _data processing pipeline_. It converts PDF documents to text and split them to smaller chuncks. You can use it for other document types, thanks to langchain for providng the `data loaders`. Backend also handles the embedding part. It initializes the _embedding model_. I have used `SentenceTransformers` to make it **faster** and **free of cost**. You can use OpenAI embeddings or other ones. I have used [Qdrant](https://qdrant.tech/) cloud (free tier) to host my embeddings and textual documents for fast search and retrieval. It can be replaced by other _vector-based_ databases such as Pinecone, Weaviate, Elasticsearch, etc., either on the cloud or _mostly locally_ hosted, depending on the vendor.
 
-- **Frontend:** I developed it using React/Typescript.
+- **Frontend:** I developed it using React/Typescript.  
 
 
 
-## Quick start
+## Quick start .
 
 If you are going to use [Qdrant Cloud](https://qdrant.tech/documentation/cloud/), then you need to sign up and get your `API_KEY` and `HOST_URL`. Otherwise you can run Qdrant locally. You can check out the documentation [here](https://qdrant.tech/). You also need OpenAI api key.
 
